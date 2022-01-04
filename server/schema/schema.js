@@ -56,7 +56,7 @@ const postsData = [
   {
     id: "3",
     comment: "I like trains",
-    userId: "3",
+    userId: "1",
   },
 ];
 
@@ -83,6 +83,7 @@ const {
   GraphQLID,
   GraphQLString,
   GraphQLInt,
+  GraphQLList,
   GraphQLSchema,
 } = graphql;
 
@@ -96,6 +97,18 @@ const UserType = new GraphQLObjectType({
     name: { type: GraphQLString },
     age: { type: GraphQLInt },
     profession: { type: GraphQLString },
+    posts: {
+      type: new GraphQLList(PostType),
+      resolve(parent, args) {
+        return _.filter(postsData, { userId: parent.id });
+      },
+    },
+    hobbies: {
+      type: new GraphQLList(HobbyType),
+      resolve(parent, args) {
+        return _.filter(hobbiesData, { userId: parent.id });
+      },
+    },
   }),
 });
 
