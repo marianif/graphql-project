@@ -88,6 +88,7 @@ const {
   GraphQLInt,
   GraphQLList,
   GraphQLSchema,
+  GraphQLNonNull,
 } = graphql;
 
 // Create types
@@ -97,7 +98,7 @@ const UserType = new GraphQLObjectType({
   description: "Documentation for user...",
   fields: () => ({
     id: { type: GraphQLID },
-    name: { type: GraphQLString },
+    name: { type: new GraphQLNonNull(GraphQLString) },
     age: { type: GraphQLInt },
     profession: { type: GraphQLString },
     posts: {
@@ -136,7 +137,7 @@ const PostType = new GraphQLObjectType({
   description: "Post description",
   fields: () => ({
     id: { type: GraphQLID },
-    comment: { type: GraphQLString },
+    comment: { type: new GraphQLNonNull(GraphQLString) },
     user: {
       type: UserType,
       resolve(parent, args) {
@@ -219,10 +220,30 @@ const Mutation = new GraphQLObjectType({
         return user;
       },
     },
+    UpdateUser: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        profession: { type: GraphQLString },
+        age: { type: GraphQLInt },
+      },
+      resolve(parent, args) {
+        return User.findByIdAndUpdate(
+          args.id,
+          {
+            name: args.name,
+            profession: args.profession,
+            age: args.age,
+          },
+          { new: true }
+        );
+      },
+    },
     DeleteUser: {
       type: UserType,
       args: {
-        id: { type: GraphQLID },
+        id: { type: new GraphQLNonNull(GraphQLID) },
       },
       resolve(parent, args) {
         return User.findByIdAndDelete(args.id);
@@ -242,6 +263,22 @@ const Mutation = new GraphQLObjectType({
         });
         post.save();
         return post;
+      },
+    },
+    UpdatePost: {
+      type: PostType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        comment: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve(parent, args) {
+        return Post.findByIdAndUpdate(
+          args.id,
+          {
+            comment: args.comment,
+          },
+          { new: true }
+        );
       },
     },
     CreateHobby: {
