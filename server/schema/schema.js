@@ -103,13 +103,13 @@ const UserType = new GraphQLObjectType({
     posts: {
       type: new GraphQLList(PostType),
       resolve(parent, args) {
-        // return _.filter(postsData, { userId: parent.id });
+        return Post.find({ userId: parent.id });
       },
     },
     hobbies: {
       type: new GraphQLList(HobbyType),
       resolve(parent, args) {
-        // return _.filter(hobbiesData, { userId: parent.id });
+        return Hobby.find({ userId: parent.id });
       },
     },
   }),
@@ -125,7 +125,7 @@ const HobbyType = new GraphQLObjectType({
     user: {
       type: UserType,
       resolve(parent, args) {
-        // return _.find(usersData, { id: parent.userId });
+        return User.findById(parent.userId);
       },
     },
   }),
@@ -140,22 +140,7 @@ const PostType = new GraphQLObjectType({
     user: {
       type: UserType,
       resolve(parent, args) {
-        // return _.find(usersData, { id: parent.userId });
-      },
-    },
-  }),
-});
-
-const EventType = new GraphQLObjectType({
-  name: "Event",
-  description: "Event description",
-  fields: () => ({
-    id: { type: GraphQLID },
-    name: { type: GraphQLString },
-    user: {
-      type: UserType,
-      resolve(parent, args) {
-        return _.find(usersData, { id: parent.userId });
+        return User.findById(parent.userId);
       },
     },
   }),
@@ -171,48 +156,40 @@ const RootQuery = new GraphQLObjectType({
       type: UserType,
       args: { id: { type: GraphQLString } },
       resolve(parent, args) {
-        // resolve with data
-        // get and return data from datasource
-        return _.find(usersData, { id: args.id });
+        return User.findById(args.id);
       },
     },
     hobby: {
       type: HobbyType,
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
-        // return _.find(hobbiesData, { id: args.id });
+        return Hobby.findById(args.id);
       },
     },
     post: {
       type: PostType,
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
-        // return _.find(postsData, { id: args.id });
+        return Post.findById(args.id);
       },
     },
-    event: {
-      type: EventType,
-      args: { id: { type: GraphQLID } },
-      resolve(parent, args) {
-        // return _.find(eventsData, { id: args.id });
-      },
-    },
+
     users: {
       type: new GraphQLList(UserType),
       resolve(parent, args) {
-        // return usersData;
+        return User.find({});
       },
     },
     posts: {
       type: new GraphQLList(PostType),
       resolve(parent, args) {
-        // return postsData;
+        return Post.find({});
       },
     },
     hobbies: {
       type: new GraphQLList(HobbyType),
       resolve(parent, args) {
-        // return hobbiesData;
+        return Hobby.find({});
       },
     },
   },
@@ -237,9 +214,18 @@ const Mutation = new GraphQLObjectType({
           age: args.age,
           profession: args.profession,
         });
-        // save in our mongoDB
+        // save in mongoDB
         user.save();
         return user;
+      },
+    },
+    DeleteUser: {
+      type: UserType,
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve(parent, args) {
+        return User.findByIdAndDelete(args.id);
       },
     },
     CreatePost: {
